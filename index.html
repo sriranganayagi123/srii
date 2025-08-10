@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Company Stock Price Viewer</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      display: flex;
+      height: 100vh;
+    }
+    #company-list {
+      width: 250px;
+      background: #f4f4f4;
+      border-right: 1px solid #ddd;
+      padding: 10px;
+      overflow-y: auto;
+    }
+    #company-list h2 {
+      margin-top: 0;
+      text-align: center;
+    }
+    .company {
+      padding: 10px;
+      margin: 5px 0;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    .company:hover, .company.active {
+      background-color: #007bff;
+      color: white;
+    }
+    #chart-container {
+      flex-grow: 1;
+      padding: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="company-list">
+    <h2>Companies</h2>
+    <!-- Companies will be inserted here -->
+  </div>
+
+  <div id="chart-container">
+    <canvas id="stockChart"></canvas>
+  </div>
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script>
+    // Mock stock price data (dates and prices)
+    const stockData = {
+      "Apple": {
+        dates: ["2025-07-01", "2025-07-02", "2025-07-03", "2025-07-04", "2025-07-05", "2025-07-06", "2025-07-07"],
+        prices: [145, 147, 150, 149, 152, 155, 157]
+      },
+      "Google": {
+        dates: ["2025-07-01", "2025-07-02", "2025-07-03", "2025-07-04", "2025-07-05", "2025-07-06", "2025-07-07"],
+        prices: [2750, 2765, 2780, 2770, 2795, 2800, 2815]
+      },
+      "Microsoft": {
+        dates: ["2025-07-01", "2025-07-02", "2025-07-03", "2025-07-04", "2025-07-05", "2025-07-06", "2025-07-07"],
+        prices: [299, 301, 305, 303, 310, 312, 315]
+      },
+      "Amazon": {
+        dates: ["2025-07-01", "2025-07-02", "2025-07-03", "2025-07-04", "2025-07-05", "2025-07-06", "2025-07-07"],
+        prices: [3400, 3420, 3450, 3435, 3470, 3500, 3525]
+      }
+    };
+
+    // Reference to company list container
+    const companyListEl = document.getElementById('company-list');
+
+    // Chart.js chart instance
+    let stockChart;
+
+    // Function to create company list items
+    function renderCompanyList() {
+      Object.keys(stockData).forEach((company, index) => {
+        const div = document.createElement('div');
+        div.className = 'company';
+        div.textContent = company;
+        div.addEventListener('click', () => {
+          setActiveCompany(div);
+          renderChart(company);
+        });
+        if (index === 0) {
+          div.classList.add('active');
+          renderChart(company);
+        }
+        companyListEl.appendChild(div);
+      });
+    }
+
+    // Highlight active company
+    function setActiveCompany(activeEl) {
+      const companies = document.querySelectorAll('.company');
+      companies.forEach(c => c.classList.remove('active'));
+      activeEl.classList.add('active');
+    }
+
+    // Render stock price chart for a company
+    function renderChart(company) {
+      const ctx = document.getElementById('stockChart').getContext('2d');
+      const data = stockData[company];
+
+      const config = {
+        type: 'line',
+        data: {
+          labels: data.dates,
+          datasets: [{
+            label: `${company} Stock Price`,
+            data: data.prices,
+            borderColor: 'rgba(0, 123, 255, 1)',
+            backgroundColor: 'rgba(0, 123, 255, 0.2)',
+            fill: true,
+            tension: 0.3,
+            pointRadius: 5,
+            pointHoverRadius: 7,
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            x: {
+              title: {
+                display: true,
+                text: 'Date'
+              }
+            },
+            y: {
+              title: {
+                display: true,
+                text: 'Price (USD)'
+              },
+              beginAtZero: false
+            }
+          }
+        }
+      };
+
+      if (stockChart) {
+        stockChart.destroy();
+      }
+      stockChart = new Chart(ctx, config);
+    }
+
+    // Initialize
+    renderCompanyList();
+
+  </script>
+
+</body>
+</html>
